@@ -1,0 +1,10 @@
+import { ArrowDownToLine, CheckCircle2, Clock3 } from "lucide-react";
+import db from "@repo/db/client";
+import { getCurrentMerchant } from "../../../lib/merchant";
+import { ResourcePage } from "../components/ResourcePage";
+
+export default async function SettlementsPage() {
+  const merchant = await getCurrentMerchant();
+  const settlements = merchant ? await db.settlement.findMany({ where: { merchantId: merchant.id }, orderBy: { createdAt: "desc" }, take: 100 }) : [];
+  return <ResourcePage eyebrow="Money movement" title="Settlements" description="Track when collected funds become available in your connected account.">{!settlements.length ? <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.025] px-6 py-14 text-center"><div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-200"><ArrowDownToLine className="h-5 w-5" /></div><h2 className="mt-4 text-base font-semibold text-white">No settlements yet</h2><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">Settlement batches will appear after completed payments are ready to move out.</p></div> : <div className="mt-6 grid gap-3">{settlements.map((settlement) => <div key={settlement.id} className="glass-panel flex items-center justify-between rounded-2xl p-5"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-amber-300/10 text-amber-200">{settlement.status === "Completed" ? <CheckCircle2 className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}</span><div><p className="text-sm font-semibold text-white">{settlement.reference}</p><p className="mt-1 text-xs text-slate-500">{settlement.createdAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p></div></div><div className="text-right"><p className="text-sm font-semibold text-white">₹{(settlement.amount / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p><p className="mt-1 text-xs text-slate-500">{settlement.status}</p></div></div>)}</div>}</ResourcePage>;
+}

@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@source "../../../packages/ui";
+
+:root {
+  --paywall-bg: #f7f8f4;
+  --paywall-surface: #ffffff;
+  --paywall-border: #e1e5dc;
+  --paywall-text: #111b0d;
+  --paywall-muted: #687064;
+  --paywall-accent: #163300;
+  --paywall-lime: #9fe870;
+  --paywall-soft: #eef1eb;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--paywall-bg);
+  color: var(--paywall-text);
+  font-feature-settings: "ss01" 1, "cv11" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: #b9f596; color: #163300; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f0f2ed; }
+::-webkit-scrollbar-thumb { background: #c9d0c4; border: 2px solid #f0f2ed; border-radius: 999px; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+
+.glass-panel {
+  border: 1px solid var(--paywall-border);
+  background: var(--paywall-surface);
+  box-shadow: 0 4px 18px rgba(22, 51, 0, 0.045);
+  backdrop-filter: none;
+}
+
+.auth-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #f7f8f4;
+}
+.auth-shell::before,
+.auth-shell::after { position: absolute; z-index: -1; content: ""; border-radius: 999px; pointer-events: none; }
+.auth-shell::before { top: -12rem; left: -8rem; width: 30rem; height: 30rem; background: #c6f5a7; opacity: .45; }
+.auth-shell::after { right: -10rem; bottom: -12rem; width: 28rem; height: 28rem; background: #e3f7d8; opacity: .8; }
+
+.brand-mark {
+  display: inline-flex; width: 2.25rem; height: 2.25rem; align-items: center; justify-content: center;
+  border-radius: 999px; background: var(--paywall-accent); color: white; font-size: 1rem; font-weight: 800;
+}
+.field-label { display: block; color: #354030; font-size: .75rem; font-weight: 700; }
+.field-control {
+  display: block; width: 100%; min-height: 3rem; border: 1px solid #d8ded3; border-radius: .35rem;
+  background: #fff; padding: 0 .875rem; color: #111b0d; font-size: .875rem; outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.field-control::placeholder { color: #8b9486; }
+.field-control:hover { border-color: #adb8a6; }
+.field-control:focus { border-color: #163300; box-shadow: 0 0 0 3px rgba(159, 232, 112, .38); }
+.field-icon { position: absolute; top: 50%; left: .875rem; color: #75806f; transform: translateY(-50%); pointer-events: none; }
+.eyebrow { color: #56703f; font-size: .68rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+
+/* The old screens used dark utility classes. Keep their layout, but move the
+   visual language to Paywall's light editorial palette in one place. */
+[data-theme="light"] .text-white { color: #111b0d !important; }
+[data-theme="light"] .text-slate-200 { color: #263224 !important; }
+[data-theme="light"] .text-slate-300 { color: #354030 !important; }
+[data-theme="light"] .text-slate-400 { color: #687064 !important; }
+[data-theme="light"] .text-slate-500 { color: #7b8577 !important; }
+[data-theme="light"] .text-slate-600 { color: #687064 !important; }
+[data-theme="light"] [class*="border-white/"] { border-color: #e1e5dc !important; }
+[data-theme="light"] [class*="divide-white/"] { border-color: #e7ebe4 !important; }
+[data-theme="light"] [class*="bg-white/"] { background-color: #f5f7f2 !important; }
+[data-theme="light"] [class*="bg-cyan-"] { background-color: var(--paywall-lime) !important; }
+[data-theme="light"] [class*="text-cyan-"] { color: #163300 !important; }
+[data-theme="light"] [class*="border-cyan-"] { border-color: #b7df9b !important; }
+[data-theme="light"] [class*="bg-indigo-"] { background-color: #edf2e9 !important; }
+[data-theme="light"] [class*="text-indigo-"] { color: #355228 !important; }
+[data-theme="light"] [class*="border-indigo-"] { border-color: #d4e1cb !important; }
+[data-theme="light"] [class*="bg-slate-950"] { background-color: #fff !important; }
+[data-theme="light"] [class*="bg-\[#07101f\]"] { background-color: #f7f8f4 !important; }
+[data-theme="light"] .bg-gradient-to-br { background-image: linear-gradient(135deg, #9fe870, #d8f7c1) !important; }
+[data-theme="light"] .glass-panel { background: #fff; }
+
+[data-theme="dark"] {
+  --paywall-bg: #07111f;
+  --paywall-surface: #101e34;
+  --paywall-border: rgba(255, 255, 255, .1);
+  --paywall-text: #f8fafc;
+  --paywall-muted: #8fa0b7;
+  --paywall-accent: #67e8f9;
+  --paywall-lime: #67e8f9;
+  color-scheme: dark;
+}
+[data-theme="dark"] body { background: var(--paywall-bg); color: var(--paywall-text); }
+[data-theme="dark"] .glass-panel { border-color: var(--paywall-border); background: linear-gradient(145deg, rgba(22, 40, 68, .8), rgba(12, 24, 43, .72)); box-shadow: 0 24px 70px -42px rgba(0,0,0,.95); }
+[data-theme="dark"] .field-control { border-color: rgba(255,255,255,.11); background: rgba(3,10,20,.34); color: #f8fafc; }
+[data-theme="dark"] .field-label { color: #cbd5e1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

@@ -1,0 +1,28 @@
+import Link from "next/link";
+import { ArrowDownLeft, ArrowRight, ArrowUpRight, History, LockKeyhole, Plus, Send, WalletCards } from "lucide-react";
+import { getServerSession } from "next-auth";
+import prisma from "@repo/db/client";
+import { authOptions } from "../../lib/auth";
+import { OnRampTransaction } from "../../../components/OnRampTransaction";
+
+export const metadata = { title: "Home | Paywall", description: "Your Paywall wallet overview" };
+
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  const userId = Number(session?.user?.id);
+  const [balance, transactions] = await Promise.all([
+    prisma.balance.findFirst({ where: { userId } }),
+    prisma.onRampTransaction.findMany({ where: { userId }, orderBy: { startTime: "desc" }, take: 5 }),
+  ]);
+  const available = balance?.amount || 0;
+  const locked = balance?.locked || 0;
+  const firstName = session?.user?.name?.split(" ")[0] || "there";
+  const mapped = transactions.map((transaction) => ({ time: transaction.startTime, amount: transaction.amount, status: transaction.status, provider: transaction.provider }));
+  return <div className="mx-auto max-w-[1120px]">
+    <div className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-black uppercase tracking-[.18em] text-[#6b8d53]">Home</p><h1 className="mt-3 text-4xl font-black tracking-[-.06em]">Good morning, {firstName}.</h1><p className="mt-2 text-sm text-[#687064]">Here&apos;s what&apos;s happening with your money.</p></div><div className="flex gap-2"><Link href="/transfer" className="inline-flex items-center gap-2 rounded-full bg-[#9fe870] px-4 py-2.5 text-xs font-bold text-[#163300] hover:bg-[#b8f495]"><Plus className="h-3.5 w-3.5" />Add money</Link><Link href="/p2p" className="inline-flex items-center gap-2 rounded-full bg-[#163300] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#2a5417]"><Send className="h-3.5 w-3.5" />Send</Link></div></div>
+    <section className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><div className="relative overflow-hidden rounded-2xl bg-[#163300] p-7 text-white sm:p-9"><div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border-[34px] border-[#9fe870]/20" /><div className="relative"><div className="flex items-center justify-between"><p className="text-xs font-bold uppercase tracking-[.18em] text-[#c2f39e]">Available balance</p><WalletCards className="h-5 w-5 text-[#9fe870]" /></div><p className="mt-10 text-5xl font-black tracking-[-.06em]">₹{(available / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p><p className="mt-2 text-sm text-[#c6d5bd]">Ready to spend or send</p><div className="mt-8 flex flex-wrap gap-2"><Link href="/transfer" className="inline-flex items-center gap-2 rounded-full bg-[#9fe870] px-4 py-2.5 text-xs font-bold text-[#163300]">Add money <ArrowRight className="h-3.5 w-3.5" /></Link><Link href="/p2p" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold text-white">Send money <ArrowRight className="h-3.5 w-3.5" /></Link></div></div></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1"><div className="rounded-2xl border border-[#e1e5dc] bg-white p-6"><div className="flex items-center gap-2 text-[#687064]"><LockKeyhole className="h-4 w-4" /><span className="text-xs font-bold uppercase tracking-[.14em]">Locked balance</span></div><p className="mt-7 text-2xl font-black">₹{(locked / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p><p className="mt-1 text-xs text-[#7b8577]">Held for processing</p></div><div className="rounded-2xl border border-[#e1e5dc] bg-[#eef1eb] p-6"><div className="flex items-center gap-2 text-[#687064]"><History className="h-4 w-4" /><span className="text-xs font-bold uppercase tracking-[.14em]">Wallet total</span></div><p className="mt-7 text-2xl font-black">₹{((available + locked) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p><p className="mt-1 text-xs text-[#7b8577]">Including locked balance</p></div></div></section>
+    <section className="mt-10 grid gap-8 lg:grid-cols-[1.25fr_.75fr]"><div><div className="mb-4 flex items-end justify-between"><div><p className="text-xs font-black uppercase tracking-[.18em] text-[#6b8d53]">Activity</p><h2 className="mt-2 text-2xl font-black tracking-[-.04em]">Recent top-ups</h2></div><Link href="/transactions" className="text-xs font-bold text-[#4a8630] hover:underline">View all</Link></div><OnRampTransaction transactions={mapped} title="" /></div><div><p className="text-xs font-black uppercase tracking-[.18em] text-[#6b8d53]">Shortcuts</p><div className="mt-4 space-y-2"><ActionCard href="/transfer" icon={<ArrowDownLeft className="h-4 w-4" />} title="Add money" text="Top up from your bank" /><ActionCard href="/p2p" icon={<ArrowUpRight className="h-4 w-4" />} title="Send money" text="Pay a Paywall contact" /><ActionCard href="/account" icon={<WalletCards className="h-4 w-4" />} title="Your account" text="Manage your settings" /></div></div></section>
+  </div>;
+}
+
+function ActionCard({ href, icon, title, text }: { href: string; icon: React.ReactNode; title: string; text: string }) { return <Link href={href} className="flex items-center justify-between rounded-xl border border-[#e1e5dc] bg-white p-4 transition hover:border-[#b8c8ad] hover:bg-[#f4f8f0]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#e7f5dc] text-[#4a8630]">{icon}</span><span><span className="block text-sm font-bold">{title}</span><span className="mt-1 block text-xs text-[#7b8577]">{text}</span></span></span><ArrowRight className="h-4 w-4 text-[#84907f]" /></Link>; }
